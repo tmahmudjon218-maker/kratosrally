@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Kratos Rally — CYBERDYNE & Mahmudjon Orifov",
+  "short_name": "KratosRally",
+  "description": "CYBERDYNE Corporation va Mahmudjon Orifov hamkorligida ishlab chiqarilgan Kratos Rally poyga o'yini",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#080a12",
+  "background_color": "#080a12",
+  "categories": ["games", "racing", "action"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

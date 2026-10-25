@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Kratos Rally — CYBERDYNE &amp; Mahmudjon Orifov</title>
+    <meta name="description" content="CYBERDYNE Corporation va Mahmudjon Orifov hamkorligida ishlab chiqarilgan Kratos Rally poyga o'yini" />
+    <meta property="og:title" content="Kratos Rally — CYBERDYNE &amp; Mahmudjon Orifov" />
+    <meta property="og:description" content="CYBERDYNE Corporation va Mahmudjon Orifov hamkorligida ishlab chiqarilgan Kratos Rally poyga o'yini" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Android PWA & Mobile Web Standards -->
+    <meta name="theme-color" content="#080a12" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Kratos Rally" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Orbitron:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- 3D WebGL Canvas Mount -->
+    <div id="canvas-container"></div>
+
+    <!-- Helmet Visor Overlay (Visible in Camera 2: Helmet Visor POV) -->
+    <div id="helmet-visor-overlay" class="hidden">
+      <div class="visor-vignette"></div>
+    </div>
+
+    <!-- Subtle Corner Vignette Behind HUD Elements -->
+    <div id="hud-corner-vignette"></div>
+
+    <!-- Streamlined HUD Overlay -->
+    <div id="hud-root">
+      <!-- Top Row: "KRATOS RALLY" Title (Top-Left) & Lap Counter/Timer + Fullscreen & Mute (Top-Right) -->
+      <header class="hud-top-bar">
+        <div class="hud-top-left-stack">
+          <div
+            id="hud-brand-logo"
+            class="hud-brand-title"
+            role="button"
+            tabindex="0"
+            title="Boshqaruv va Kamera Menyu (Click)"
+          >
+            <div class="brand-title-badge">KRATOS RALLY</div>
+            <div class="brand-title-collab">CYBERDYNE × MAHMUDJON</div>
+          </div>
+        </div>
+
+        <div class="hud-settings-anchor">
+          <div class="hud-top-right-row">
+            <!-- Top-Right Lap Counter & Lap Timer -->
+            <div id="hud-lap-widget" class="hud-lap-widget">
+              <div id="hud-lap-header" class="hud-lap-header">
+                AYLANA <span id="hud-lap-curr" class="hud-lap-curr">1</span>/3
+              </div>
+              <div id="hud-lap-timer" class="hud-lap-timer" aria-label="00:00.00">
+                <span class="timer-digit" id="lap-d0">0</span><span class="timer-digit" id="lap-d1">0</span><span class="timer-sep">:</span><span class="timer-digit" id="lap-d2">0</span><span class="timer-digit" id="lap-d3">0</span><span class="timer-sep">.</span><span class="timer-digit" id="lap-d4">0</span><span class="timer-digit" id="lap-d5">0</span>
+              </div>
+              <div id="hud-lap-split" class="hud-lap-split hidden"></div>
+            </div>
+
+            <!-- Fullscreen Toggle Button (Crucial for Android full immersion) -->
+            <button
+              id="btn-fullscreen"
+              class="hud-icon-btn"
+              type="button"
+              aria-label="To'liq ekran (F)"
+              title="To'liq ekran (F)"
+            >
+              <svg class="hud-action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+
+            <!-- Android PWA Install Chip -->
+            <button
+              id="btn-pwa-install"
+              class="hud-install-chip hidden"
+              type="button"
+              aria-label="O'yinni o'rnatish"
+              title="O'yinni o'rnatish"
+            >
+              <svg class="install-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>O'RNATISH</span>
+            </button>
+
+            <!-- Top-Right Mute / Unmute Sound Icon Button -->
+            <button
+              id="btn-mute-sound"
+              class="hud-mute-btn is-muted"
+              type="button"
+              aria-label="Ovozni yoqish/o'chirish (M)"
+              title="Ovozni yoqish/o'chirish (M)"
+            >
+              <!-- Speaker Unmuted Icon -->
+              <svg id="icon-sound-on" class="mute-svg hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+              </svg>
+              <!-- Speaker Muted Icon -->
+              <svg id="icon-sound-off" class="mute-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Welcome & Controls Dialog (Shown on Launch & When Clicking Title) -->
+      <div id="welcome-dialog-overlay" class="welcome-dialog-overlay">
+        <div class="welcome-dialog-card" role="dialog" aria-labelledby="welcome-title">
+          <!-- Official Co-Production Brand Announcement Banner -->
+          <div class="brand-co-production-banner">
+            <div class="brand-collab-statement">
+              CYBERDYNE Corporation va Mahmudjon Orifov hamkorligida ishlab chiqarilgan o'yin
+            </div>
+            <div class="brand-badge-row">
+              <span class="brand-emblem cyberdyne-emblem">CYBERDYNE CORPORATION</span>
+              <span class="brand-divider">×</span>
+              <span class="brand-emblem mahmudjon-emblem">MAHMUDJON ORIFOV</span>
+            </div>
+          </div>
+
+          <div class="welcome-eyebrow">GRAND PRIX CIRCUIT · 3 AYLANA · ANDROID EDITION</div>
+          <h1 id="welcome-title" class="welcome-title">KRATOS RALLY</h1>
+
+          <div class="welcome-controls-grid">
+            <!-- WASD & Touch Driving Controls -->
+            <div class="welcome-control-block">
+              <div class="welcome-control-label">BOSHQARUV (CONTROLS)</div>
+              <div class="control-keys-list" aria-label="Driving Controls">
+                <div class="control-key-row">
+                  <div class="control-kbd-pair">
+                    <kbd class="welcome-key">W</kbd>
+                    <span class="control-touch-tag">ACCEL</span>
+                  </div>
+                  <span>GAZ / TEZLIK</span>
+                </div>
+                <div class="control-key-row">
+                  <div class="control-kbd-pair">
+                    <kbd class="welcome-key">A</kbd>
+                    <kbd class="welcome-key">D</kbd>
+                  </div>
+                  <span>BURILISH</span>
+                </div>
+                <div class="control-key-row">
+                  <div class="control-kbd-pair">
+                    <kbd class="welcome-key">S</kbd>
+                    <span class="control-touch-tag">BRAKE</span>
+                  </div>
+                  <span>TORMOZ</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game Views 1-4 -->
+            <div class="welcome-control-block">
+              <div class="welcome-control-label">KAMERA KO'RINISHI (VIEWS)</div>
+              <div class="cam-keys-list">
+                <div class="cam-key-row cam-pill active" data-cam="1"><kbd class="welcome-key welcome-key-cyan">1</kbd><span>ORQADAN</span></div>
+                <div class="cam-key-row cam-pill" data-cam="2"><kbd class="welcome-key welcome-key-cyan">2</kbd><span>KOKPIT / VISOR</span></div>
+                <div class="cam-key-row cam-pill" data-cam="3"><kbd class="welcome-key welcome-key-cyan">3</kbd><span>UMUMIY TRASSA</span></div>
+                <div class="cam-key-row cam-pill" data-cam="4"><kbd class="welcome-key welcome-key-cyan">4</kbd><span>DRON KAMERA</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="welcome-footer-row">
+            <button id="btn-welcome-start" class="welcome-start-btn" type="button">
+              <span id="welcome-start-text" class="welcome-start-text">POYGANI BOSHLASH</span>
+              <kbd id="welcome-enter-kbd" class="welcome-enter-kbd">ENTER ↵</kbd>
+              <span class="welcome-btn-progress-track" aria-hidden="true">
+                <span id="welcome-btn-progress-fill" class="welcome-btn-progress-fill"></span>
+              </span>
+            </button>
+            <button id="btn-open-apk-modal" class="welcome-apk-btn" type="button" title="Android APK O'rnatish">
+              <svg class="apk-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>ANDROID APK</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android APK & Installation Modal -->
+      <div id="apk-dialog-overlay" class="welcome-dialog-overlay hidden" role="dialog" aria-labelledby="apk-dialog-title">
+        <div class="welcome-dialog-card apk-dialog-card">
+          <div class="brand-co-production-banner">
+            <div class="brand-collab-statement">
+              CYBERDYNE Corporation va Mahmudjon Orifov
+            </div>
+          </div>
+          <div class="welcome-eyebrow">ANDROID O'RNATISH VA APK</div>
+          <h2 id="apk-dialog-title" class="welcome-title">KRATOS RALLY APK</h2>
+
+          <div class="apk-options-grid">
+            <!-- 1-usul: WebAPK direct install -->
+            <div class="apk-option-card">
+              <div class="apk-option-badge">1-USUL · TAVSIYA ETILADI</div>
+              <div class="apk-option-title">1 Bosishda Telefoningizga O'rnatish (WebAPK)</div>
+              <div class="apk-option-desc">
+                Google Chrome orqali telefoningizga to'g'ridan-to'g'ri o'rnatiladi. U telefon menyusida alohida APK ilova sifatida paydo bo'ladi.
+              </div>
+              <button id="btn-apk-direct-install" class="welcome-start-btn apk-card-btn" type="button">
+                <span>TELEFONGA O'RNATISH (INSTALL)</span>
+              </button>
+            </div>
+
+            <!-- 2-usul: Download APK via PWABuilder -->
+            <div class="apk-option-card">
+              <div class="apk-option-badge">2-USUL · TAYYOR APK</div>
+              <div class="apk-option-title">Tayyor .APK Faylini Yuklab Olish</div>
+              <div class="apk-option-desc">
+                PWABuilder xizmati orqali o'yin havolasini kiritib, 1 daqiqada tayyor imzolangan <code>kratos-rally.apk</code> yuklab olishingiz mumkin.
+              </div>
+              <a href="https://www.pwabuilder.com" target="_blank" rel="noopener noreferrer" class="welcome-start-btn apk-card-btn apk-link-btn">
+                <span>PWABUILDER ORQALI APK OLISH ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="welcome-footer-row" style="margin-top: 16px;">
+            <button id="btn-close-apk-modal" class="welcome-start-btn" type="button" style="width: 100%;">
+              <span>YOPISH / O'YINGA QAYTISH</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Formula 1 Countdown Number (Triggered by pressing Enter at Start) -->
+      <div id="hud-f1-countdown" class="hud-f1-countdown hidden">5</div>
+
+      <!-- Finish Dialog Overlay -->
+      <div id="hud-finish-overlay" class="welcome-dialog-overlay hud-finish-overlay hidden" role="dialog" aria-labelledby="hud-finish-title">
+        <div class="welcome-dialog-card finish-dialog-card">
+          <div class="brand-co-production-banner finish-banner">
+            <div class="brand-collab-statement">
+              CYBERDYNE Corporation va Mahmudjon Orifov hamkorligida ishlab chiqarilgan o'yin
+            </div>
+          </div>
+          <div class="welcome-eyebrow">KRATOS RALLY · 3 AYLANA TUGADI</div>
+          <h2 id="hud-finish-title" class="hud-finish-title">FINISH!</h2>
+          <div id="hud-finish-time" class="hud-finish-time">00:00.00</div>
+          <div id="hud-finish-sub" class="hud-finish-sub">ENG YAXSHI AYLANA 00:00.00</div>
+          <div class="finish-actions-row">
+            <button id="btn-finish-race-again" class="welcome-start-btn finish-action-btn" type="button">
+              <span class="welcome-start-text">QAYTA POYGA</span>
+              <kbd class="welcome-enter-kbd">ENTER ↵</kbd>
+            </button>
+            <button id="btn-finish-autopilot" class="welcome-start-btn finish-action-btn finish-autopilot-btn" type="button">
+              <span class="welcome-start-text">AVTO-PILOT</span>
+              <kbd class="welcome-enter-kbd">P</kbd>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: 3D Tilted Racetrack Minimap (Bottom-Left) | Angled Segmented Speedometer HUD (Bottom-Right) -->
+      <footer class="hud-bottom-bar">
+        <!-- Bottom-Left: Borderless Horizontally-Tilted 3D Racetrack Outline & Cyan Glowing Dot -->
+        <div class="hud-minimap-widget" title="Trassa xaritasi">
+          <canvas id="minimap-canvas" width="600" height="390"></canvas>
+        </div>
+
+        <!-- Bottom-Right: Sleek Angled Segmented Speed Bar + Italic KM/H & Speed Readout -->
+        <div class="hud-speedo-gauge">
+          <svg id="speedo-gauge-svg" viewBox="0 0 284 134" class="speedo-svg">
+            <defs>
+              <linearGradient id="speedoFrameStrokeGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="rgba(255, 255, 255, 0.35)" />
+                <stop offset="45%" stop-color="rgba(160, 240, 255, 0.55)" />
+                <stop offset="100%" stop-color="rgba(0, 232, 255, 0.92)" />
+              </linearGradient>
+              <filter id="speedoCyanGlow" x="-25%" y="-25%" width="150%" height="150%">
+                <feGaussianBlur stdDeviation="2.4" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- Outer dark angled bar casing & cyan-accented frame -->
+            <polygon
+              id="speedo-bar-casing"
+              points="15,108 62,34 268,6 276,22 73,50 28,118"
+              class="speedo-bar-casing"
+              stroke="url(#speedoFrameStrokeGrad)"
+            />
+
+            <!-- 18 angled parallelogram speed segments populated dynamically at startup -->
+            <g id="speedo-ticks-group"></g>
+          </svg>
+
+          <!-- Italic KM/H label & Large Bold Italic Speed Readout tucked inside the angled bar -->
+          <div class="speedo-readout-group">
+            <div class="speedo-unit-label">KM/H</div>
+            <div id="hud-scale-speed" class="speedo-digits">0</div>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Mobile Bottom Touch Controls Row (Steer on Left, Gas/Brake/Drift on Right) -->
+      <div
+        id="mobile-touch-controls"
+        class="mobile-touch-controls hidden"
+        role="region"
+        aria-label="Mobile Driving Controls"
+      >
+        <!-- Left Side: Left (A) and Right (D) Steer Buttons -->
+        <div class="mobile-ctrl-cluster mobile-steer-cluster" role="group" aria-label="Steering Controls">
+          <button
+            id="btn-touch-left"
+            class="mobile-ctrl-btn mobile-ctrl-steer"
+            type="button"
+            data-control="left"
+            aria-label="Steer Left (A)"
+            title="Chapga burilish"
+          >
+            <span class="mobile-ctrl-inner">
+              <svg class="mobile-ctrl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="13 17 8 12 13 7"></polyline>
+                <polyline points="18 17 13 12 18 7" opacity="0.45"></polyline>
+              </svg>
+              <span class="mobile-ctrl-label">CHAP</span>
+            </span>
+          </button>
+
+          <button
+            id="btn-touch-right"
+            class="mobile-ctrl-btn mobile-ctrl-steer"
+            type="button"
+            data-control="right"
+            aria-label="Steer Right (D)"
+            title="O'ngga burilish"
+          >
+            <span class="mobile-ctrl-inner">
+              <svg class="mobile-ctrl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="11 17 16 12 11 7"></polyline>
+                <polyline points="6 17 11 12 6 7" opacity="0.45"></polyline>
+              </svg>
+              <span class="mobile-ctrl-label">O'NG</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Center: Quick Camera Switch Button for Mobile -->
+        <div class="mobile-center-tools">
+          <button
+            id="btn-touch-cam"
+            class="mobile-ctrl-btn mobile-ctrl-cam"
+            type="button"
+            aria-label="Kamerani almashtirish"
+            title="Kamerani almashtirish"
+          >
+            <span class="mobile-ctrl-inner">
+              <svg class="mobile-ctrl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span class="mobile-ctrl-label">KAMERA</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Right Side: Accelerate (W), Brake (S), and Drift (Space) -->
+        <div class="mobile-ctrl-cluster mobile-pedal-cluster" role="group" aria-label="Accelerate and Brake Controls">
+          <button
+            id="btn-touch-brake"
+            class="mobile-ctrl-btn mobile-ctrl-brake"
+            type="button"
+            data-control="backward"
+            aria-label="Tormoz (S)"
+            title="Tormoz (S)"
+          >
+            <span class="mobile-ctrl-inner">
+              <svg class="mobile-ctrl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="7 8 12 13 17 8"></polyline>
+                <line x1="7" y1="17" x2="17" y2="17"></line>
+              </svg>
+              <span class="mobile-ctrl-label">TORMOZ</span>
+            </span>
+          </button>
+
+          <button
+            id="btn-touch-accel"
+            class="mobile-ctrl-btn mobile-ctrl-accel"
+            type="button"
+            data-control="forward"
+            aria-label="Gaz (W)"
+            title="Gaz (W)"
+          >
+            <span class="mobile-ctrl-inner">
+              <svg class="mobile-ctrl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="17 13 12 8 7 13"></polyline>
+                <polyline points="17 18 12 13 7 18" opacity="0.45"></polyline>
+              </svg>
+              <span class="mobile-ctrl-label">GAZ</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

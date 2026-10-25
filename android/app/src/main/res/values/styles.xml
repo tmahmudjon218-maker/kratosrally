@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.KratosRally" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#080a12</item>
+        <item name="android:navigationBarColor">#080a12</item>
+        <item name="android:windowBackground">#080a12</item>
+    </style>
+
+    <style name="Theme.KratosRally.Fullscreen" parent="Theme.KratosRally">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>
